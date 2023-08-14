@@ -17,7 +17,8 @@ class Optimizer():
             self.learning_rate = self.initial_learning_rate / (1. + self.exponential_decay * self.iter)
 
         for layer in layers:
-            self._update(layer)
+            if hasattr(layer, 'W'):
+                self._update(layer)
 
         self.iter += 1
 

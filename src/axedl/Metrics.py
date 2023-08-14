@@ -1,8 +1,11 @@
 import numpy as np
 
 
-class Accuracy():
-    
+class CategoricalAccuracy():
+    def __init__(self):
+        self.name = 'categorical_accuracy'
+
+
     def __call__(self, y_pred, y_true):
         
         preds = np.argmax(y_pred, axis = 1)
@@ -12,6 +15,9 @@ class Accuracy():
     
 
 class BinaryAccuracy():
+    def __init__(self):
+        self.name = 'binary_accuracy'
+
     
     def __call__(self, logits, y_true):
         preds = (logits > 0.5) * 1

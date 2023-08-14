@@ -30,7 +30,7 @@ class CategoricalCrossEntropy(Loss):
         super().__init__(reduction)
 
         self.activation = Softmax()
-        self.loss = CategoricalCrossEntropyWithoutSoftmax() 
+        self.loss = NegativeLogLikelihood() 
 
 
     def forward(self, logits, y_true):
@@ -50,7 +50,7 @@ class CategoricalCrossEntropy(Loss):
         return self.dX
     
 
-class CategoricalCrossEntropyWithoutSoftmax(Loss):      #TODO: Rename based on PyTorch
+class NegativeLogLikelihood(Loss):
 
     def forward(self, y_pred, y_true):
         y_pred = np.clip(y_pred, 1e-7, 1 - 1e-7)        # Clip to prevent division per zero
@@ -90,6 +90,32 @@ class BinaryCrossEntropy(Loss):
         dv = np.clip(dv, 1e-7, 1 - 1e-7)                # Clip to prevent division per zero
 
         self.dX = -(y_true / dv - (1 - y_true) / (1 - dv)) / len(dv[0])
+        self.dX /= len(dv)                              # Gradient normalization
+
+        return self.dX
+    
+
+class MeanSquaredError(Loss):
+
+    def forward(self, y_pred, y_true):
+        return np.mean(np.square(y_true - y_pred), axis = -1)
+    
+
+    def backward(self, dv, y_true):
+        self.dX = -2 * (y_true - dv) / len(dv[0])
+        self.dX /= len(dv)                              # Gradient normalization
+
+        return self.dX
+    
+
+class MeanAbsoluteError(Loss):
+
+    def forward(self, y_pred, y_true):
+        return np.mean(np.abs(y_true - y_pred), axis = -1)
+    
+
+    def backward(self, dv, y_true):
+        self.dX = np.sign(y_true - dv) / len(dv[0])
         self.dX /= len(dv)                              # Gradient normalization
 
         return self.dX
